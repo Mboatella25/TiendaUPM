@@ -4,46 +4,50 @@ import Models.Client;
 import Models.Cash;
 
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class UserRepository {
-    private final List<User> users = new ArrayList<>();
-    //Añadir un usuario (Cliente o Cajero) y asegurar que son únicos
+    private final Map<String, User> users = new HashMap<>();
+
     public void addUser(User user) {
-        if (getUserbyId(user.getId()).isPresent()){
+        if (users.containsKey(user.getId())) {
             throw new IllegalArgumentException("Usuario con ID " + user.getId() + " ya existe");
         }
-        users.add(user);
+        users.put(user.getId(), user);
     }
-    //Eliminar al usuario por su ID
+
     public void removeUser(String id) {
-        users.removeIf(user -> user.getId().equals(id));
+        if (!users.containsKey(id)) {
+            throw new IllegalArgumentException("Usuario con ID " + id + " no existe");
+        }
+        users.remove(id);
     }
-    //Get usar by Id
-    public Optional<User> getUserbyId(String id) {
-        return users.stream()
-                .filter(user -> user.getId().equals(id))
-                .findFirst();
+
+    public Optional<User> getUserById(String id) {
+        return Optional.ofNullable(users.get(id));
     }
-    //Get all clients
+
+    public boolean existsClient(String dni) {
+        return users.containsKey(dni) && users.get(dni) instanceof Client;
+    }
+
+    public boolean existsCashier(String cashId) {
+        return users.containsKey(cashId) && users.get(cashId) instanceof Cash;
+    }
+
     public List<Client> getAllClients() {
-        List<Client> clients = new ArrayList<>();
-        for (User u : users) {
-            if (u instanceof Client) {
-                clients.add((Client) u);
-            }
-        }
-        return clients;
+        return users.values().stream()
+                .filter(user -> user instanceof Client)
+                .map(user -> (Client) user)
+                .collect(Collectors.toList());
     }
-    //Get all cashiers
+
     public List<Cash> getAllCash() {
-        List<Cash> cashes = new ArrayList<>();
-        for (User u : users) {
-            if (u instanceof Cash) {
-                cashes.add((Cash) u);
-            }
-        }
-        return cashes;
+        return users.values().stream()
+                .filter(user -> user instanceof Cash)
+                .map(user -> (Cash) user)
+                .collect(Collectors.toList());
     }
+
 }

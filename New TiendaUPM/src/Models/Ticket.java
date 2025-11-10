@@ -1,12 +1,79 @@
 package Models;
 
 import ProductModels.Product;
+import Models.Cash;
+import Models.User;
+import Models.Client;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 public class Ticket {
+
+    public enum Estado{
+        VACIO, ACTIVO, CERRADO
+    }
+
+    private String id;
+    private Estado estado;
+    private final String clientId;
+    private final String cashId;
+    private final LocalDateTime creationDate;
+    private LocalDateTime closeDate;
     private static final int maxProducts = 100;
     private Map<Integer, TicketItem> items = new HashMap<>();
+
+    public Ticket(){
+        //initialize default values
+        this.clientId = "";
+        this.cashId = "";
+        this.creationDate = LocalDateTime.now();
+        this.id = generateId();
+        this.estado = Estado.VACIO;
+        this.items = new HashMap<>();
+    }
+
+    public Ticket(String clientId, String cashtId, String id) {
+        if (clientId == null || clientId.isBlank()) throw new IllegalArgumentException("Client ID required");
+        if (cashtId == null || cashtId.isBlank()) throw new IllegalArgumentException("CashtId required");
+
+        this.clientId = clientId;
+        this.cashId = cashtId;
+        this.id = (id == null || id.isBlank()) ? generateId() : id;
+        this.estado = Estado.VACIO;
+        this.creationDate = LocalDateTime.now();
+        this.items = new HashMap<>();
+    }
+
+    //Generate a unique ticket ID based on assignment rules
+    private String generateId() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yy-MM-dd-HH:mm");
+        String prefix = creationDate.format(formatter);
+        int randomNum = new Random().nextInt(100000);
+        return prefix + String.format("%05d", randomNum);
+    }
+
+    //Mark ticket as closed
+    public void closeTicket(){
+        if (estado == Estado.CERRADO) throw new IllegalStateException("Ticket already closed");
+        this.estado = Estado.CERRADO;
+        this.closeDate = LocalDateTime.now();
+        updateIdWithCloseDate();
+    }
+
+    //Update ID to include closing date
+    private void updateIdWithCloseDate(){
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yy-MM-dd-HH:mm");
+        this.id += closeDate.format(formatter);
+    }
+    public String getId() {return id;}
+    public Estado getEstado() {return estado;}
+    public String getClientId() {return clientId;}
+    public String getCashId() {return cashId;}
+    public LocalDateTime getCreationDate() {return creationDate;}
+    public LocalDateTime getCloseDate() {return closeDate;}
+    public Map<Integer, TicketItem> getItems() {return Collections.unmodifiableMap(items);}
 
     public void addProduct(Product product, int quantity) {
         if (quantity <= 0) throw new IllegalArgumentException("Invalid quantity.");
