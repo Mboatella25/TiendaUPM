@@ -2,8 +2,8 @@ package Models;
 
 public abstract class User {
     private final String id; //DNI o UW
-    private final String name;
-    private final String email;
+    private String name;
+    private  String email;
 
     protected User(String id, String name, String email) {
         if (id == null || id.isBlank()) throw new IllegalArgumentException("Invalid id");
