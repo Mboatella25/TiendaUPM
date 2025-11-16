@@ -1,14 +1,14 @@
 package Controllers;
 
-import Models.User;
+import Models.Ticket;
 import Models.Client;
 import Models.Cash;
 import Repository.UserRepository;
 
-import java.util.ArrayList;
+
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
+
 
 public class UserController {
     private final UserRepository userRepository;
@@ -22,7 +22,7 @@ public class UserController {
         try{
 
             //Verificar que el cajero existe
-            if(!userRepository.exitsCashier(cashId)){
+            if(!userRepository.existsCashier(cashId)){
                 return "Error: El cajero con ID " + cashId + " no existe";
             }
 
@@ -40,10 +40,10 @@ public class UserController {
 
     }
     public String removeClient(String dni){
-       try{
-           if(!userRepository.exitsClient(dni)){
-               return "Error: El cliente con ID " + dni + " no existe";
-           }
+        if(!userRepository.existsClient(dni))
+            return "Error: El cliente con ID " + dni + " no existe";
+
+        try{
            userRepository.removeUser(dni);
            return "Cliente eliminado: " + dni;
        }catch (IllegalArgumentException e){
@@ -57,16 +57,18 @@ public class UserController {
     }
 
     //Cajeros
-    public String addCash(String dni, String name, String email){
+    public String addCash(String id, String name, String email){
         try{
-            Cash cash = new Cash(dni, name, email);
+            Cash cash = new Cash(id, name, email);
 
             //Verificamos que el Id sea unico
             if (userRepository.existsCashier(cash.getId())){
                 return "Error: El cajero con ID " + cash.getId() + " ya existe";
             }
+
             userRepository.addUser(cash);
             return "Cajero añadido: " + cash.getId();
+
         }catch(IllegalArgumentException e){
             return "Error: " + e.getMessage();
         }
@@ -90,11 +92,19 @@ public class UserController {
         return cashiers;
     }
 
-    public boolean cashierExists(String cashId){
-        return userRepository.existsCashier(cashId);
+    public List<Ticket> getCashTickets(String cashId) {
+        return userRepository.getCashTickets(cashId);
     }
 
-    public boolean clientExists(String dni){
-        return userRepository.existsClient(dni);
+    public int getTotalUserCount(){
+        return userRepository.getUserCount();
     }
+    public int getClientCount(){
+        return userRepository.getAllClients().size();
+    }
+    public int getCashCount(){
+        return userRepository.getAllCash().size();
+    }
+
+
 }

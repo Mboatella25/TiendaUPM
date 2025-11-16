@@ -1,18 +1,22 @@
 package ProductModels;
 
 import Models.Category;
+import java.util.Objects;
 
-public class Product {
-    private static final int maxNameLength = 100;
-    private final int id;
-    private String name;
-    private Category category;
-    private double price;
+public abstract class Product {
+    protected final int maxNameLength = 100;
+    protected final String id;
+    protected String name;
+    protected Category category;
+    protected double price;
 
-    public Product(int id, String name, Category category, double price) {
-        if (id < 0) throw new IllegalArgumentException("ID must be positive");
-        if (name == null || name.isBlank() || name.length() > maxNameLength) throw new IllegalArgumentException("Invalid name");
-        if (price < 0) throw new IllegalArgumentException("Price must be > 0");
+    public Product(String id, String name,Category category, double price) {
+        if (id == null || id.isBlank())
+            throw new IllegalArgumentException("ID no puede ser nulo o vacío");
+        if (name == null || name.isBlank() || name.length() > maxNameLength)
+            throw new IllegalArgumentException("Invalid name");
+        if (price < 0)
+            throw new IllegalArgumentException("Price must be >= 0");
 
         this.id = id;
         this.name = name;
@@ -20,32 +24,44 @@ public class Product {
         this.price = price;
     }
 
-    // Getters y setters
-    public int getId() { return id; }
+    // Getters
+    public String getId() { return id; }
     public String getName() { return name; }
-    public Category getCategory() { return category; }
+    public Category getCategory(){ return category; }
     public double getPrice() { return price; }
 
+    //Setters
     public void setName(String name) {
-        if (name == null || name.isEmpty() || name.length() > maxNameLength)
+        if (name == null || name.isBlank() || name.length() > maxNameLength)
             throw new IllegalArgumentException("Invalid name.");
         this.name = name;
     }
-
-    public void setCategory(Category category) { this.category = category; }
-
+    public void setCategory(Category category) {
+        this.category = category;
+    }
     public void setPrice(double price) {
-        if (price <= 0) throw new IllegalArgumentException("Price must be > 0.");
+        if (price < 0)
+            throw new IllegalArgumentException("Price must be >= 0.");
         this.price = price;
     }
 
-    public boolean isCustomizable() { return false; }
 
     @Override
     public String toString() {
-        return "{class:Product, id:" + id +
-                ", name:\'" + name +
-                "\', category:" + category +
-                ", price:" + price + "}";
+        return String.format("{class:Product, id:%s, name:'%s', category:%s, price:%.2f}",
+                id, name, category, price);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Product)) return false;
+        Product product = (Product) o;
+        return Objects.equals(id, product.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

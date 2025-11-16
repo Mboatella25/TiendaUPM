@@ -4,8 +4,8 @@ public final class Client extends User {
     //atributos especificos del cliente: quien lo dio de alta (cash id)
     private final String cashId;
 
-    public Client(String DNI, String nombre, String email, String cashId) {
-        super(DNI, nombre, email);
+    public Client(String clientId, String nombre, String email, String cashId) {
+        super(clientId, nombre, email);
         if (cashId == null || cashId.isBlank())
             throw new IllegalArgumentException("El cashId es necesario");
         this.cashId = cashId;

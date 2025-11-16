@@ -1,7 +1,10 @@
 package Models;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public final class Cash  extends User{
+    private final List<Ticket> tickets = new ArrayList<>();
     //id tiene que ser "UW" + 7 digitos aleatorios / puede pasarse o ser autogenerado
     public Cash(String id, String name, String email) {
         super(validarOGenerarId(id), name, email);
@@ -20,6 +23,20 @@ public final class Cash  extends User{
         return "UW" + num;
     }
 
+    public boolean canModifyTicket(String ticketId) {
+        return tickets.stream().anyMatch(t -> t.getId().equals(ticketId));
+    }
+
+    //para gestión de tickets
+    public void addTicket(Ticket ticket) {
+        tickets.add(ticket);
+    }
+    public void removeTicket(Ticket ticket) {
+        tickets.remove(ticket);
+    }
+    public List<Ticket> getTickets() {
+        return List.copyOf(tickets);
+    }
     @Override
     public String toString() {
         return String.format("{class:Cajero, id:%s, nombre:'%s', email:%s}", getId(), getName(), getEmail());
