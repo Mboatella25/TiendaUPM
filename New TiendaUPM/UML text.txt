@@ -1,0 +1,244 @@
+@startuml
+
+' ===================== App ==========================
+class App {
+    + main(args : String[]) : void
+}
+
+' ===================== USUARIOS =====================
+abstract class User {
+    - id : String
+    - name : String
+    - email : String
+    + getId() : String
+    + getName() : String
+    + getEmail() : String
+}
+
+class Cashier {
+    - createdTickets : List<String>
+    + addTicket(ticketId : String)
+    + getTickets() : List<String>
+    + toString() : String
+}
+
+class Client {
+    - cashId : String
+    + getCashierId() : String
+    + toString() : String
+}
+
+User <|-- Cashier
+User <|-- Client
+
+' ===================== Category ======================
+enum Category {
+    MERCH = 0.0
+    STATIONERY = 0.05
+    CLOTHES = 0.07
+    BOOK = 0.1
+    ELECTRONICS = 0.03
+    + getDiscount() : double
+}
+
+' ===================== PRODUCTOS =====================
+abstract class Product {
+    - id : String
+    - name : String
+    - price : double
+    + calculatePrice(quantity : int, customizations : List<String>) : double
+}
+
+interface Discountable {
+    + calculateDiscount(quantity : int, customizations : List<String>, sameCategoryQuantity : int) : double
+}
+
+class BasicProduct {
+    - category : Category
+}
+
+class CustomProduct {
+    - maxPersonalizations : int
+    - personalizationList : List<String>
+    + addPersonalizations(customizations : List<String>)
+}
+
+class TemporalProduct {
+    - date : LocalDate
+    - maxPeople : int
+}
+
+class FoodProduct {
+    - PLANNING_TIME : int = 3
+}
+
+class MeetingProduct {
+    - PLANNING_TIME : int = 12
+}
+
+Product <|-- BasicProduct
+BasicProduct <|-- CustomProduct
+Product <|-- TemporalProduct
+
+TemporalProduct <|-- FoodProduct
+TemporalProduct <|-- MeetingProduct
+
+BasicProduct ..|> Discountable
+CustomProduct ..|> Discountable
+
+' ===================== TICKETS =====================
+class Ticket {
+    - id : String
+    - status : Status
+    - cashierId : String
+    - userId : String
+    - items : List<TicketItem>
+    - currentProductTotal : int
+    + addProduct(product : Product, quantity : int, customizations : List<String>)
+    + removeProduct(productId : String) : boolean
+    + printTicket()
+    + showTicket()
+    + closeTicket()
+    + getId() : String
+    + getStatus() : Status
+    + getCashierId() : String
+    + getUserId() : String
+    + getProduct(productId : String) : Product
+}
+
+enum Status {
+    EMPTY
+    OPEN
+    CLOSE
+}
+
+class TicketItem {
+    - product : Product
+    - quantity : int
+    - customizations : List<String>
+    + getProduct() : Product
+    + getQuantity() : int
+    + getCustomizations() : List<String>
+    + toString() : String
+}
+
+Ticket "1" *-- "many" TicketItem
+TicketItem --> Product
+
+' ===================== REPOSITORIOS =====================
+class UserRepository {
+     - clients : Map<String, Client>
+        - cashiers : Map<String, Cashier>
+        - cashiersUsedIds : Set<String>
+        + addClient(name : String, dni : String, email : String, cashierId : String) : boolean
+        + removeClient(dni : String) : boolean
+        + listClients() : Collection<Client>
+        + getClient(dni : String) : Client
+        + addCashier(name : String, email : String, id : String) : Cashier
+        + removeCashier(id : String) : boolean
+        + listCashiers() : Collection<Cashier>
+        + getCashier(id : String) : Cashier
+        - generateCashierId() : String
+}
+
+class ProductRepository {
+    - products : Map<String, Product>
+    - usedIds : Set<String>
+    + addProduct(product : Product)
+    + updateProduct(id : String, field : String, value : String) : boolean
+    + removeProduct(id : String) : boolean
+    + listProducts()
+    + getProduct(id : String) : Product
+    - generateProductId() : String
+}
+
+class TicketRepository {
+     - tickets : Map<String, Ticket>
+        - ticketUsedIds : Set<String>
+        - products : ProductRepository
+        - userRepository : UserRepository
+        + newTicket(ticketId : String, cashierId : String, userId : String) : Ticket
+        + addTicketProduct(ticketId : String, cashierId : String, productId : String, amount : int, customizations : List<String>) : boolean
+        + getTicket(id : String) : Ticket
+        + getProductFromTicket(ticketId : String, productId : String) : Product
+        + removeProductFromTicket(ticketId : String, cashierId : String, productId : String) : boolean
+        + listTickets() : Collection<Ticket>
+        + removeTicketsByCashier(cashier : Cashier)
+        + getCashier(id : String) : Cashier
+        - generateTicketId() : String
+}
+
+' ===================== CONTROLADORES =====================
+class UserController {
+    - userRepository : UserRepository
+        + addClient(name : String, dni : String, email : String, cashierId : String)
+        + removeClient(dni : String)
+        + listClients() : Collection<Client>
+        + getClient(dni : String) : Client
+        + addCashier(name : String, email : String, id : String)
+        + removeCashier(id : String)
+        + listCashiers() : Collection<Cashier>
+        + getCashier(id : String) : Cashier
+}
+
+class ProductController {
+     - productRepository : ProductRepository
+     + addProduct(product : Product)
+     + removeProduct(id : String)
+     + updateProduct(id : String, field : String, value : String)
+     + listProducts()
+     + getProduct(id : String) : Product
+}
+
+class TicketController {
+    - ticketRepository : TicketRepository
+        + createTicket(ticketId : String, cashierId : String, clientId : String)
+        + addProductToTicket(ticketId : String, cashierId : String, productId : String, quantity : int, customizations : List<String>)
+        + listTickets()
+        + listTicketsByCashier(cashierId : String)
+        + printTicket(ticketId : String)
+        + removeProductFromTicket(ticketId : String, cashierId : String, productId : String)
+        + removeTicketsFromCashier(id : String)
+        + getProductFromTicket(ticketId : String, productId : String) : Product
+        + getTicket(id : String) : Ticket
+}
+
+class CommandController {
+    - userRepository : UserRepository
+        - productRepository : ProductRepository
+        - ticketRepository : TicketRepository
+        - userController : UserController
+        - productController : ProductController
+        - ticketController : TicketController
+        - scanner : Scanner
+        + CommandController()
+        + run()
+        - process(input : String)
+        - handleClient(commandParts : String[])
+        - handleCashier(commandParts : String[])
+        - handleTicket(commandParts : String[])
+        - handleProduct(commandParts : String[])
+        - printHelp()
+        - handleEcho(commandParts : String[])
+        - extractQuotedText(commandParts : String[], startIndex : int) : String
+}
+
+App --> CommandController
+
+' ===================== RELACIONES =====================
+UserController --> UserRepository
+ProductController --> ProductRepository
+TicketController --> TicketRepository
+
+CommandController --> UserController
+CommandController --> ProductController
+CommandController --> TicketController
+
+TicketRepository --> Ticket
+ProductRepository --> Product
+
+UserRepository --> Client
+UserRepository --> Cashier
+
+
+@enduml
