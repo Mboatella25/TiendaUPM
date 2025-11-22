@@ -1,6 +1,7 @@
 package ProductModels;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
@@ -8,7 +9,10 @@ public class MeetingProduct extends TemporalProduct {
     private static final int PLANNING_TIME = 12;
     public MeetingProduct(String id, String name, double price, LocalDate date, int maxPeople) {
         super(id, name, price, date, maxPeople);
-        if (ChronoUnit.HOURS.between(LocalDate.now().atStartOfDay(), date.atStartOfDay()) < PLANNING_TIME)
+
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime eventStart = date.atStartOfDay();
+        if (ChronoUnit.HOURS.between(now, eventStart) < PLANNING_TIME)
             throw new IllegalArgumentException("Meeting requires at least 12 hours notice");
     }
 

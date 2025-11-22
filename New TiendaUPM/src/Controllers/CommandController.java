@@ -42,7 +42,6 @@ public class CommandController {
 
             if (input.isEmpty()) continue;
 
-            System.out.println(input);
             process(input);
         }
     }
@@ -75,7 +74,11 @@ public class CommandController {
                     handleEcho(commandParts);
                     System.out.println();
                 }
-                case "exit" -> System.exit(0);
+                case "exit" -> {
+                    System.out.println("Closing application.");
+                    System.out.println("Goodbye!");
+                    System.exit(0);
+                }
                 default -> System.out.println("Unknown command: Type 'help'.");
             }
         } catch (Exception exception) {
@@ -213,8 +216,10 @@ public class CommandController {
 
     // ---------------- PRODUCT COMMANDS ----------------
     private void handleProduct(String[] commandParts) {
-        if (commandParts.length < 2) System.out.println("Usage: prod <add|update|addFood|addMeeting|list|remove>");
-
+        if (commandParts.length < 2) {
+            System.out.println("Usage: prod <add|update|addFood|addMeeting|list|remove>");
+            return;
+        }
         switch (commandParts[1].toLowerCase()) {
             case "add" -> {
                 if (commandParts.length < 5) {
@@ -361,8 +366,8 @@ public class CommandController {
                   exit
                 
                 Categories: [MERCH, STATIONERY, CLOTHES, BOOK, ELECTRONICS]
-                Discount if there is more than 2 units of the same category:
-                MERCH 0%, PAPELERIA 5%, ROPA 7%, LIBRO 10%, ELECTRONICA 3%.
+                Discount if there are >= 2 units in the category:
+                MERCH 0%, STATIONERY 5%, CLOTHES 7%, BOOK 10%, ELECTRONICS 3%.
                 """);
     }
 

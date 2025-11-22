@@ -40,6 +40,7 @@ public class TicketController {
         Collection<Ticket> tickets = ticketRepository.listTickets();
         System.out.println("Ticket list:");
         tickets.forEach(ticket -> System.out.printf("%s - %s\n", ticket.getId(), ticket.getStatus()));
+        System.out.println("ticket list: ok");
     }
 
     public void listTicketsByCashier(String cashierId) {
@@ -81,10 +82,8 @@ public class TicketController {
 
     public void removeTicketsFromCashier(String id) {
         Cashier cashier = ticketRepository.getCashier(id);
-        if (cashier == null) {
-            System.out.println("Cashier not found.");
+        if (cashier == null)
             return;
-        }
         ticketRepository.removeTicketsByCashier(cashier);
     }
 

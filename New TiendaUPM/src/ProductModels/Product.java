@@ -21,7 +21,6 @@ public abstract class Product {
     public double getPrice() { return price; }
     public void setName(String name) { this.name = name; }
     public void setPrice(double price) { this.price = price; }
-
     public void setId(String id) { this.id = id; }
 
     public abstract double calculatePrice(int quantity, List<String> customizations);
